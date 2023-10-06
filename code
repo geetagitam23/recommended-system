@@ -1,0 +1,55 @@
+import pandas as pd
+from surprise import Dataset, Reader, SVD
+from surprise.model_selection import train_test_split
+from surprise import accuracy
+
+# Sample movie ratings dataset
+data = {
+    'user_id': ['User1', 'User1', 'User2', 'User2', 'User3'],
+    'item_id': ['Movie1', 'Movie2', 'Movie1', 'Movie3', 'Movie2'],
+    'rating': [5, 4, 4, 3, 5],
+}
+
+df = pd.DataFrame(data)
+
+# Define the Reader object to specify the rating scale
+reader = Reader(rating_scale=(1, 5))
+
+# Load the dataset from the DataFrame
+dataset = Dataset.load_from_df(df[['user_id', 'item_id', 'rating']], reader)
+
+# Split the dataset into a training set and a test set
+trainset, testset = train_test_split(dataset, test_size=0.2)
+
+# Build and train the collaborative filtering model (SVD)
+model = SVD()
+model.fit(trainset)
+
+# Make predictions for the test set
+predictions = model.test(testset)
+
+# Evaluate the model's performance using RMSE (Root Mean Squared Error)
+rmse = accuracy.rmse(predictions)
+print(f'RMSE: {rmse}')
+
+# Recommend movies for a specific user (e.g., User1)
+user_id = 'User1'
+user_movies = df[df['user_id'] == user_id]['item_id'].tolist()
+
+# Create a list of movies that the user has not rated
+all_movies = df['item_id'].unique()
+unrated_movies = [movie for movie in all_movies if movie not in user_movies]
+
+# Predict ratings for unrated movies
+user_predictions = [(user_id, movie, model.predict(user_id, movie).est) for movie in unrated_movies]
+
+# Sort predictions by estimated rating in descending order
+user_predictions.sort(key=lambda x: x[2], reverse=True)
+
+# Recommend the top N movies
+top_n = 5
+recommended_movies = user_predictions[:top_n]
+
+print(f"Top {top_n} recommended movies for {user_id}:")
+for movie_id, estimated_rating in recommended_movies:
+    print(f"Movie ID: {movie_id}, Estimated Rating: {estimated_rating:.2f}")
