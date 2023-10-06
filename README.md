@@ -33,6 +33,7 @@ Output:
 The output of the project includes two main parts:
 
 RMSE Value: The Root Mean Squared Error (RMSE) value, which quantifies the prediction accuracy of the collaborative filtering model on the test set.
+https://www.kaggle.com/pgeetanjali123/recommended-system/edit
 
 Top Recommended Movies: The top N movies recommended to the selected user based on their predicted ratings. The movie IDs and estimated ratings for each recommendation are displayed.
 
